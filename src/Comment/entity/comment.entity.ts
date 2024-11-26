@@ -1,6 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, Column, OneToMany } from 'typeorm';
 import { posts } from 'src/Post/Entity/post.entity';
 import { users } from 'src/User/Entity/user.emtity';
+
+
 
 @Entity()
 export class comments {
@@ -21,6 +23,37 @@ export class comments {
 
     @CreateDateColumn()
     createdAt: Date;
+
+
+    @Column({ default: true })
+    isComment: boolean;
+
 }
+
+
+@Entity()
+export class replies {
+    @PrimaryGeneratedColumn()
+    id: number;
+
+    @ManyToOne(() => comments, (comment) => comment.id, { onDelete: 'CASCADE', eager: true })
+    comment: comments;
+
+    @Column()
+    userId: number;
+
+    @Column()
+    postowner: number;
+
+    @Column()
+    reply: string;
+
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @Column({ default: true })
+    isReply: boolean;
+}
+
 
 

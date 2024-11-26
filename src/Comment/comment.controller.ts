@@ -1,6 +1,5 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
-// import { LikesGateway } from './like.gtaeway';
-import { CommentDto } from './DTO/comment.dto';
+import { Controller, Post, Body, Get, Put } from '@nestjs/common';
+import { CommentDto, DelCommentDto, getCommentsDto } from './DTO/comment.dto';
 import { CommentsService } from './comment.service';
 import { LikesGateway } from 'src/Like/like.gtaeway';
 
@@ -23,22 +22,18 @@ export class CommentController {
         return { success: true, comments };
     }
 
-    // @Post('unLike_post')
-    // async unLikePost(@Body() unlikeDto: unLikeDto) {
-    //     const unLike = await this.likesService.unLikePost(unlikeDto);
-    //     // console.log(unLike)
-    //     const unLikedBy = unLike.unLikeBy
-    //     const message = `Your post was unliked by ${unLikedBy}`;
-    //     console.log(unLike)
-    //     this.likesGateway.notifyPostOwner(unLike.postOwnerId, message);
-    //     return { success: true, unLike };
-    // }
+    @Put('delete_comment')
+    async deleteComment(@Body() delCommentDto: DelCommentDto) {
+        const deleteComment = await this.commentsService.deleteComment(delCommentDto);
+        return { success: true, deleteComment }
+    }
 
-    // @Get('get_like_counts')
-    // async getLikeCounts(@Body() likeCountDto: LikeCountDto) {
-    //     const { postId } = likeCountDto
-    //     console.log(postId)
-    //     const like = await this.likesService.getLikeCount(postId);
-    //     return { success: true, like };
-    // }
+    @Get('get_all_comments_byId')
+    async getAllComments(@Body() getcommentsDto: getCommentsDto) {
+        const allComments = await this.commentsService.getAllComments(getcommentsDto);
+        if (allComments.length == 0) {
+            return { success: true, message: "No comments found" }
+        }
+        return { success: true, allComments };
+    }
 }

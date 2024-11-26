@@ -1,10 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { posts } from 'src/Post/Entity/post.entity';
 import { users } from 'src/User/Entity/user.emtity';
 import { comments } from './entity/comment.entity';
-import { CommentDto } from './DTO/comment.dto';
+import { CommentDto, DelCommentDto, getCommentsDto } from './DTO/comment.dto';
 
 
 @Injectable()
@@ -66,6 +66,48 @@ export class CommentsService {
         //     await this.likesRepository.save(isLiked);
         // }
 
+    }
+
+    async deleteComment(delCommentDto: DelCommentDto) {
+        try {
+            const { postId, userId, commentId } = delCommentDto;
+            const isUserExists = await this.usersRepository.findOne({ where: { id: userId } })
+            if (!isUserExists) {
+                throw new NotFoundException('User not found')
+            }
+            const isPostExists = await this.postsRepository.findOne({ where: { id: postId } })
+            if (!isPostExists) {
+                throw new NotFoundException('Post not found');
+            }
+
+            const isCommentExists = await this.commentsRepository.findOne({ where: { post: isPostExists, userId: userId, id: commentId } })
+            if (!isCommentExists) {
+                throw new NotFoundException('Comment not found !!')
+            }
+            isCommentExists.isComment = false
+            return await this.commentsRepository.save(isCommentExists);
+
+
+        } catch (error) {
+            throw new InternalServerErrorException(error.message)
+        }
+    }
+
+    async getAllComments(getcommentsDto: getCommentsDto) {
+        try {
+            const { postId } = getcommentsDto;
+            const isPostExists = await this.postsRepository.findOne({ where: { id: postId } })
+            if (!isPostExists) {
+                throw new NotFoundException('Post not found !!')
+            }
+
+            const comments = await this.commentsRepository.find({ where: { post: isPostExists, isComment: true } })
+
+            return comments
+
+        } catch (error) {
+            throw new InternalServerErrorException(error.message)
+        }
     }
 
     // async unLikePost(unlikeDto: unLikeDto) {
